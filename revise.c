@@ -95,9 +95,11 @@ static void direct_branch_revise(instance_t *instance, const revise_item_t *item
 void object_revise(object_t *object)
 
 {
+#if 0
 	int i, revise_count = OBJECT_REVISE_COUNT(object);
 
 	for (i = 0; i < revise_count; i++) {
 		direct_branch_revise(object->instance, &object->revise_items[i]);
 	}
+#endif
 }
