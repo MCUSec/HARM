@@ -14,23 +14,24 @@ struct _object_instance {
 	uint32_t address;
 };
 
-union _callsite {
-	uint32_t address;
-	struct {
+typedef struct _object_instance instance_t;
+
+struct _callsite {
+	union {
+		uint32_t value;
 		uint16_t offset;
 		uint16_t index;
-	} u;
+	} address;
+	instance_t *callee;
 };
 
-typedef struct _object_instance instance_t;
-typedef union _callsite callsite_t;
+typedef struct _callsite callsite_t;
 
 struct _object {
-	instance_t		 		*instance;
-	const revise_item_t		*revise_items;
-	uint32_t			address;
-	uint32_t			flags;
-	uint16_t 			size;
+	instance_t	*instance;
+	uint32_t	address;
+	uint32_t	flags;
+	uint16_t 	size;
 } __attribute__((packed));
 
 typedef struct _object object_t;

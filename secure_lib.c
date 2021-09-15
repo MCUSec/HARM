@@ -34,6 +34,115 @@ USED static uint32_t address_encode(uint32_t address)
 	return ret;
 }
 
+ASM NONSECURE_CALLABLE void secure_direct_call(void)
+{
+	__asm volatile(
+	"  .syntax unified                           \n"
+	"  .extern branchList                        \n"
+	"                                            \n"
+	"  push    {r3-r4}                           \n"
+	"  ubfx    r3, lr, #1, #27                   \n"
+	"  ldr     r4, branch_tbl                    \n"
+	"  adds    r4, r3, lsl #3                    \n"
+	"  ldr     r4, [r4, #4]                      \n"
+	"  ldr     r12, [r4]                         \n"
+	"  pop     {r3-r4}                           \n"
+	"  bxns    r12                               \n"
+	"                                            \n"
+	"  .align 2                                  \n"
+	"branch_tbl: .word branchList                \n"
+	);
+}
+
+ASM NONSECURE_CALLABLE void secure_indirect_call(void)
+{
+	__asm volatile(
+	"  .syntax unified                            \n"
+	"  .extern instanceList                       \n"
+	"  .extern g_instance_num                     \n"
+	"                                             \n"
+	"  push    {r3}                               \n"
+	"  lsrs    r3, r12, #24                       \n"
+	"  teq     r3, #0xff                          \n"
+	"  beq     .L_secure_indirect_call_exit       \n"
+	"  tst     r12, #0x10000000                   \n"
+	"  beq     __dispatch_fail                    \n"
+    "  ubfx    r12, r12, #16, #12                 \n"  // r12 = r12[27:16] (index)
+	"  ldr     r3, dispatch_tbl_sz2               \n"
+	"  ldr     r3, [r3]                           \n"
+	"  cmp     r12, r3                            \n"
+	"  bge     __dispatch_fail                    \n"
+	"  ldr     r3, dispatch_tbl2                  \n"
+	"  ldr     r12, [r3, r12, lsl #2]             \n"
+	"                                             \n"
+	".L_secure_indirect_call_exit:                \n"
+	"  pop     {r3}                               \n"
+	"  bxns    r12                                \n"
+	"                                             \n"
+	"  .align 2                                   \n"
+	"dispatch_tbl2: .word instanceList            \n"
+	"dispatch_tbl_sz2: .word g_instance_num       \n"
+	);
+}
+
+ASM NONSECURE_CALLABLE void secure_tail_call(void)
+{
+	__asm volatile(
+	"  .syntax unified                           \n"
+	"  .extern instanceList                      \n"
+	"  .extern g_instance_num                    \n"
+	"                                            \n"
+	"  push    {r3}                              \n"
+	"  ldr     r3, dispatch_tbl_sz3              \n"
+	"  ldr     r3, [r3]                          \n"
+	"  cmp     r12, r3                           \n"
+	"  bge     __dispatch_fail                   \n"
+	"  ldr     r3, dispatch_tbl3                 \n"
+	"  ldr     r12, [r3, r12, lsl #2]            \n"
+	"  pop     {r3}                              \n"
+	"  bxns    r12                               \n"
+	"                                            \n"
+	"  .align 2                                  \n"
+	"dispatch_tbl3: .word instanceList           \n"
+	"dispatch_tbl_sz3: .word g_instance_num      \n"
+	);
+}
+
+ASM NONSECURE_CALLABLE void secure_return(void)
+{
+	__asm volatile(
+	"  .syntax unified                             \n"
+	"  .extern branchList                          \n"
+	"  .extern g_branch_num                        \n"
+	"                                              \n"
+	"  push   {r3-r4}                              \n"
+	"  lsrs   r3, lr, #24                          \n"
+	"  teq    r3, #0xff                            \n"
+	"  beq    .L_secure_return_exit                \n"
+	"  ubfx   r3, lr, #1, #27                      \n"
+	"  ldr    r4, branch_tbl_sz3                   \n"
+	"  ldr    r4, [r4]                             \n"
+	"  cmp    r3, r4                               \n"
+	"  bge    __dispatch_fail                      \n"
+	"  ldr    r4, branch_tbl3                      \n"
+	"  adds   r4, r3, lsl #3                       \n"
+	"  ldr    r3, [r4]                             \n"
+	"  uxth   r3, r3                               \n"
+	"  ldr    r4, [r4, #4]                         \n"
+	"  ldr    r4, [r4]                             \n"
+	"  adds   lr, r4, r3                           \n"
+	"                                              \n"
+	".L_secure_return_exit:                        \n"
+	"  pop    {r3-r4}                              \n"
+	"  bxns   lr                                   \n"
+	"                                              \n"
+	"  .align 2                                    \n"
+	"branch_tbl3: .word branchList                 \n"
+	"branch_tbl_sz3: .word g_branch_num            \n"
+	);
+}
+
+
 ASM NONSECURE_CALLABLE uint32_t PendSV_hook0(uint32_t ulLR)
 {
 	__asm volatile(
@@ -79,11 +188,12 @@ ASM NONSECURE_CALLABLE uint32_t PendSV_hook0(uint32_t ulLR)
 	"  add     sp, #16                           \n"
 	"  pop     {r3-r4, r7}                       \n"
 	"  ldr     lr, [sp], #4                      \n"
-    "  b    __acle_se_return_address_dispatch    \n"
+    "  b    __acle_se_secure_return              \n"
 
 	);
 }
 
+#if 0
 ASM NONSECURE_CALLABLE void return_address_dispatch(void)
 {
 	__asm volatile(
@@ -134,6 +244,7 @@ ASM NONSECURE_CALLABLE void call_address_dispatch(void)
 	"dispatch_table_size2: .word g_instance_num   \n"
 	);
 }
+#endif
 
 ASM NONSECURE_CALLABLE void enter_low_power_mode(void)
 {
@@ -149,7 +260,7 @@ ASM NONSECURE_CALLABLE void enter_low_power_mode(void)
 	"  str    r4, [r3]                            \n"
 	"  cpsie  i                                   \n"
 	"  pop    {r3-r4}                             \n"
-	"  b    __acle_se_return_address_dispatch     \n"
+	"  b    __acle_se_secure_return               \n"
 	"  .align 2                                   \n"
 	: : : "memory"
 	);

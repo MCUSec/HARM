@@ -67,6 +67,7 @@ __attribute__((naked)) void SecureFault_Handler(void)
 	"dispatch_table_size: .long g_instance_num \n"
 	"branch_table:        .long branchList     \n"
 	"branch_table_size:   .long g_branch_num   \n"
+	);
 }
 
 __attribute__((naked)) void PendSV_Handler(void)
