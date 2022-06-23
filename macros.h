@@ -37,7 +37,7 @@
 #if 1
 __attribute__((always_inline)) static inline void __set_BASEPRI(uint32_t basePri)
 {
-	__asm volatile ("MSR basepri, %0" : : "r" (basePri) : "memory");
+    __asm volatile ("MSR basepri, %0" : : "r" (basePri) : "memory");
 }
 #endif
 

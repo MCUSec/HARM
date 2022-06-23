@@ -11,26 +11,26 @@
 #include "revise.h"
 
 struct _object_instance {
-	uint32_t address;
+    uint32_t address;
 };
 
 union _callsite {
-	uint32_t address;
-	struct {
-		uint16_t offset;
-		uint16_t index;
-	} u;
+    uint32_t address;
+    struct {
+        uint16_t offset;
+        uint16_t index;
+    } u;
 };
 
 typedef struct _object_instance instance_t;
 typedef union _callsite callsite_t;
 
 struct _object {
-	instance_t		 		*instance;
-	const revise_item_t		*revise_items;
-	uint32_t			address;
-	uint32_t			flags;
-	uint16_t 			size;
+    instance_t		 		*instance;
+    const revise_item_t		*revise_items;
+    uint32_t			address;
+    uint32_t			flags;
+    uint16_t 			size;
 } __attribute__((packed));
 
 typedef struct _object object_t;

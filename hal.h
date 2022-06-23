@@ -47,28 +47,28 @@ extern "C" {
 
 static inline void __hal_enable_systick(void)
 {
-	NVIC_SYSTICK_CSR = NVIC_SYSTICK_CLK_Msk | NVIC_SYSTICK_INT_Msk | NVIC_SYSTICK_ENA_Msk;
+    NVIC_SYSTICK_CSR = NVIC_SYSTICK_CLK_Msk | NVIC_SYSTICK_INT_Msk | NVIC_SYSTICK_ENA_Msk;
 }
 
 static inline void __hal_disable_systick(void)
 {
-	NVIC_SYSTICK_CSR = 0UL;
+    NVIC_SYSTICK_CSR = 0UL;
 }
 
 static inline void __hal_init_systick(void)
 {
-	g_systick_counter = RANDOM_PERIOD;
+    g_systick_counter = RANDOM_PERIOD;
 
-	NVIC_SYSTICK_CSR = 0UL;
-	NVIC_SYSTICK_CVR = 0UL;
-	NVIC_SYSTICK_RVR = (SystemCoreClock / SYSTICK_RATE_HZ) - 1UL;
-	NVIC_SYSTICK_CSR = NVIC_SYSTICK_CLK_Msk | NVIC_SYSTICK_INT_Msk | NVIC_SYSTICK_ENA_Msk;
+    NVIC_SYSTICK_CSR = 0UL;
+    NVIC_SYSTICK_CVR = 0UL;
+    NVIC_SYSTICK_RVR = (SystemCoreClock / SYSTICK_RATE_HZ) - 1UL;
+    NVIC_SYSTICK_CSR = NVIC_SYSTICK_CLK_Msk | NVIC_SYSTICK_INT_Msk | NVIC_SYSTICK_ENA_Msk;
 }
 
 
 static inline void __hal_set_ns_vector_offset(uint32_t offset)
 {
-	SCB_NS_VTOR = offset;
+    SCB_NS_VTOR = offset;
 }
 
 void hal_rng_init(void);

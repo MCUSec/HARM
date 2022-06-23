@@ -22,26 +22,26 @@
 #endif
 
 struct harm_config {
-	struct {
-		void *base;
-		unsigned int size;
-	} sandbox;
-	uint32_t cpu_clock_hz;
-	uint32_t systick_rate;
-	uint32_t shuffle_period;
+    struct {
+        void *base;
+        unsigned int size;
+    } sandbox;
+    uint32_t cpu_clock_hz;
+    uint32_t systick_rate;
+    uint32_t shuffle_period;
 //	void (*vector_update)(void);
 };
 
 typedef struct harm_config harm_config_t;
 
 struct harm {
-	int	active_sandbox;
-	int num_objects;
-	int num_revise_items;
-	sandbox_t *sandbox;
-	const harm_config_t *config;
-	const object_t *objects;
-	const revise_item_t *revise_items;
+    int	active_sandbox;
+    int num_objects;
+    int num_revise_items;
+    sandbox_t *sandbox;
+    const harm_config_t *config;
+    const object_t *objects;
+    const revise_item_t *revise_items;
 };
 
 extern volatile uint32_t g_systick_counter;
