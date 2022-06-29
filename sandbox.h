@@ -8,22 +8,38 @@
 #ifndef SOURCE_SANDBOX_H_
 #define SOURCE_SANDBOX_H_
 
+#include <stdbool.h>
 #include <stdint.h>
+#include "metadata.h"
 #include "rb_tree/rb_tree.h"
 
-typedef struct _sandbox sandbox_t;
+struct sandbox {
+    struct rb_tree indices;
+    const uint8_t *base;
+    const uint8_t *limit;
+    uint8_t *ptr;
+};
+
+typedef struct sandbox SandBox_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-sandbox_t *sandbox_create(const uint32_t base, const size_t size, node_comp_cb_t compare);
-void sandbox_destroy(sandbox_t **sandBox);
+extern SandBox_t g_sandbox;
 
-void sandbox_reset(sandbox_t *sandBox);
-void *sandbox_bucket_allocate(sandbox_t *sandBox, const size_t size, const unsigned align, struct rb_node *rb_node);
 
-void *sandbox_get_object(sandbox_t *sandBox, const uint32_t address);
+static inline void HARM_SandBox_Reset(void)
+{
+    g_sandbox.indices.root = NULL;
+    g_sandbox.ptr = g_sandbox.base;
+}
+
+void HARM_SandBox_Init(void *base, const size_t length);
+
+bool HARM_SandBox_PutObject(Object_t *object, const unsigned align_bits);
+
+Object_t *HARM_SandBox_GetObject(const uint32_t address);
 
 #ifdef __cplusplus
 }

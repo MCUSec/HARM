@@ -1,34 +1,26 @@
-/*
- * hal.c
- *
- *  Created on: Jul 14, 2021
- *      Author: jiameng
- */
-#include <assert.h>
 #include <stdlib.h>
 #include <time.h>
-#include "LPC55S69_cm33_core0.h"
-#include "fsl_rng.h"
+#include "harm.h"
+#include "hal.h"
 
-#define RNG_PRESENT 1
+volatile uint32_t g_systick_count;
 
-void hal_rng_init(void)
+void HARM_HAL_SecureTimer_Init(void)
 {
-#if defined(RNG_PRESENT) && RNG_PRESENT
-    RNG_Init(RNG);
-#else
-    srand(time(NULL));
-#endif
+    g_systick_count = HARM_SHUFFLE_PERIOD_MS;
+
+    NVIC_SYSTICK_CSR = 0UL;
+    NVIC_SYSTICK_CVR = 0UL;
+    NVIC_SYSTICK_RVR = (SystemCoreClock / 1000u) - 1UL;
+    NVIC_SYSTICK_CSR = NVIC_SYSTICK_CLK_Msk | NVIC_SYSTICK_INT_Msk | NVIC_SYSTICK_ENA_Msk;
 }
 
-uint32_t hal_rng_get_next(void)
+WEAK void HARM_HAL_SecureRNG_Init(void)
 {
-#if defined(RNG_PRESENT) && RNG_PRESENT
-    uint32_t data;
-    status_t status = RNG_GetRandomData(RNG, &data, 4);
-    assert(status == kStatus_Success);
-    return data;
-#else
+    srand(0);
+}
+
+WEAK int HARM_HAL_SecureRNG_GetNext(void)
+{
     return rand();
-#endif
 }

@@ -1,16 +1,7 @@
-/*
- * hal.h
- *
- *  Created on: Jul 13, 2021
- *      Author: jiameng
- */
-
-#ifndef HAL_H_
-#define HAL_H_
+#ifndef HAL_H
+#define HAL_H
 
 #include <stdint.h>
-
-#include "config.h"
 #include "macros.h"
 
 #define SCB_NS_VTOR		*((volatile uint32_t *) 0xE002ED08UL)
@@ -35,49 +26,31 @@
 
 #define __NVIC_PRIO_BITS        3
 
-
-extern volatile uint32_t g_systick_counter;
+extern volatile uint32_t g_systick_count;
 extern uint32_t SystemCoreClock;
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-static inline void __hal_enable_systick(void)
-{
-    NVIC_SYSTICK_CSR = NVIC_SYSTICK_CLK_Msk | NVIC_SYSTICK_INT_Msk | NVIC_SYSTICK_ENA_Msk;
-}
-
-static inline void __hal_disable_systick(void)
+static inline void HARM_HAL_SecureTimer_Suspend(void)
 {
     NVIC_SYSTICK_CSR = 0UL;
 }
 
-static inline void __hal_init_systick(void)
+static inline void HARM_HAL_SecureTimer_Resume(void)
 {
-    g_systick_counter = RANDOM_PERIOD;
-
-    NVIC_SYSTICK_CSR = 0UL;
-    NVIC_SYSTICK_CVR = 0UL;
-    NVIC_SYSTICK_RVR = (SystemCoreClock / SYSTICK_RATE_HZ) - 1UL;
     NVIC_SYSTICK_CSR = NVIC_SYSTICK_CLK_Msk | NVIC_SYSTICK_INT_Msk | NVIC_SYSTICK_ENA_Msk;
 }
 
+void HARM_HAL_SecureTimer_Init(void);
 
-static inline void __hal_set_ns_vector_offset(uint32_t offset)
-{
-    SCB_NS_VTOR = offset;
-}
+void HARM_HAL_SecureRNG_Init(void) WEAK;
 
-void hal_rng_init(void);
-
-uint32_t hal_rng_get_next(void);
-
+int HARM_HAL_SecureRNG_GetNext(void) WEAK;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* HAL_H_ */
+#endif /* HAL_H */

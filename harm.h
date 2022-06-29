@@ -1,68 +1,57 @@
-/*
- * core.h
- *
- *  Created on: Sep 13, 2020
- *      Author: jiameng
- */
-
-#ifndef SOURCE_SHUFFLER_H_
-#define SOURCE_SHUFFLER_H_
+#ifndef HARM_H
+#define HARM_H
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "config.h"
-#include "object.h"
 #include "sandbox.h"
+#include "arch.h"
 
-#ifndef ENABLE_BENCHMARK
-#define ENABLE_BENCHMARK 1
+#define HARM_ERROR_SUCCESS  0
+#define HARM_ERROR_INDEX_OVERFLOW 1
+#define HARM_ERROR_NOT_ISR  2
+#define HARM_ERROR_NO_OBJECT    3
+#define HARM_ERROR_NO_MEMORY    4
+
+#ifndef HARM_OBJECT_LIST_SIZE  
+#define HARM_OBJECT_LIST_SIZE   1
 #endif
 
-struct harm_config {
-    struct {
-        void *base;
-        unsigned int size;
-    } sandbox;
-    uint32_t cpu_clock_hz;
-    uint32_t systick_rate;
-    uint32_t shuffle_period;
-//	void (*vector_update)(void);
-};
+#ifndef HARM_VECTOR_TBL_SIZE
+#define HARM_VECTOR_TBL_SIZE   1
+#endif
 
-typedef struct harm_config harm_config_t;
+#ifndef HARM_CALLSITE_TBL_SIZE
+#define HARM_CALLSITE_TBL_SIZE 1
+#endif
 
-struct harm {
-    int	active_sandbox;
-    int num_objects;
-    int num_revise_items;
-    sandbox_t *sandbox;
-    const harm_config_t *config;
-    const object_t *objects;
-    const revise_item_t *revise_items;
-};
+#ifndef HARM_SHUFFLE_PERIOD_MS
+#define HARM_SHUFFLE_PERIOD_MS 200
+#endif
 
-extern volatile uint32_t g_systick_counter;
-extern struct harm harm_core;
+extern const Object_t g_objects[];
+
+extern const Object_t *g_ns_vectors[];
+
+extern const Object_t *g_ns_vec_tbl;
+
+/* typedef for non-secure callback functions */
+typedef void (*funcptr_ns)(void) __attribute__((cmse_nonsecure_call));
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-const object_t *harm_get_object_by_index(int index);
+void HARM_OnError(const int errcode);
 
-const object_t *harm_get_object_by_address(uint32_t address);
+void HARM_ErrorHandler(const int errcode);
 
-int harm_get_object_index(const object_t *object);
-
-void harm_init(harm_config_t *config);
-
-void harm_randomize_code(uint32_t *ulSP);
+void HARM_Bootstrap(void) EXPORT;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SOURCE_SHUFFLER_H_ */
+#endif /* HARM_H */

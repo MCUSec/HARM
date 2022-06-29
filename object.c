@@ -1,24 +1,6 @@
-/*
- * revise.c
- *
- *  Created on: Sep 13, 2020
- *      Author: jiameng
- */
-#include <assert.h>
-#include <stdint.h>
-#include <stdlib.h>
-
 #include "harm.h"
-#include "object.h"
-#include "revise.h"
-
-#define OPCODE_ASSERT(addr, code, mask, expected) { \
-	unsigned short _opcode = (code) & (mask); \
-	if (_opcode != (expected)) { \
-		printf("%s (Line %d): unexpected opcode %x @ 0x%08x\r\n", __func__, __LINE__, _opcode, addr); \
-		abort(); \
-	} \
-}
+#include "metadata.h"
+#include "hal.h"
 
 static uint32_t encode_B_T4(const uint32_t src_addr, const uint32_t dst_addr, uint32_t *mem)
 {
@@ -72,17 +54,12 @@ static uint32_t encode_B_T3(const uint32_t src_addr, const uint32_t dst_addr, co
     return code;
 }
 
-static void direct_branch_revise(instance_t *instance, const revise_item_t *item)
-
+static inline void direct_branch_revise(uint32_t obj_addr, const BranchInfo_t *binfo)
 {
-    uint32_t target_index = (item->data >> 16) & 0xFFFFUL;
-    uint32_t inner_offset = item->data & 0xFFFFUL;
-
-    const object_t *target_obj = harm_get_object_by_index(target_index);
-
-    uint32_t dst_addr = target_obj->instance->address + inner_offset;
-    uint32_t src_addr = instance->address + item->offset;
-    uint32_t src_code = *(uint32_t *)src_addr;
+    const Object_t *target_obj = &g_objects[binfo->dst.d_index];
+    const uint32_t dst_addr = *target_obj->entry + binfo->dst.i_offset;
+    const uint32_t src_addr = obj_addr + binfo->s_offset;
+    const uint32_t src_code = *(uint32_t *)src_addr;
 
     if (!(src_code & (1 << 28))) {
         uint8_t cc = (src_code >> 6) & 0b1111;
@@ -92,12 +69,27 @@ static void direct_branch_revise(instance_t *instance, const revise_item_t *item
     }
 }
 
-void object_revise(object_t *object)
-
+void HARM_Object_FixRefs(void)
 {
-    int i, revise_count = OBJECT_REVISE_COUNT(object);
+    uint32_t *ns_vectors = (uint32_t *)*g_ns_vec_tbl->entry;
+    Object_t *obj_iter = &g_objects[0];
+    int i = 0;
 
-    for (i = 0; i < revise_count; i++) {
-        direct_branch_revise(object->instance, &object->revise_items[i]);
+    for (; i < HARM_OBJECT_LIST_SIZE; i++, obj_iter++) {
+        BranchInfo_t *binfo = obj_iter->b_info;
+        uint32_t obj_entry = *obj_iter->entry;
+        int j = 0;
+        
+        for (; j < obj_iter->n_branch; j++, binfo++) {
+            direct_branch_revise(obj_entry, binfo);
+        }
     }
+
+    for (i = 1; i < HARM_VECTOR_TBL_SIZE; i++) {
+        ns_vectors[i] = *g_ns_vectors[i]->entry;
+    }
+
+    __DSB();
+    SCB_NS_VTOR = *g_ns_vec_tbl->entry;
 }
+

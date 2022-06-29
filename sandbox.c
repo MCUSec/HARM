@@ -1,93 +1,75 @@
-/*
- * sandbox.c
- *
- *  Created on: Sep 13, 2020
- *      Author: jiameng
- */
-
-
 #include <stdlib.h>
 #include <string.h>
 #include "sandbox.h"
 
 #define ALIGN(x, a) (((x) + ((a) - 1)) & ~((a) - 1))
 
-struct _sandbox {
-    struct rb_tree rb_tree;
-    uint32_t size;
-    uint32_t bufPtr;
-    uint32_t base;
-    uint32_t used;
-    uint32_t capacity;
-};
+SandBox_t g_sandbox;
 
-
-sandbox_t *sandbox_create(const uint32_t start, const size_t size, node_comp_cb_t compare)
+static inline int HARM_SandBox_IndexCmp(const struct rb_node *node, const unsigned long key)
 {
-    sandbox_t *sandBox = malloc(sizeof(struct _sandbox));
-
-    sandBox->rb_tree.root = NULL;
-    sandBox->rb_tree.compare = compare;
-
-    sandBox->base = start;
-    sandBox->used = 0;
-    sandBox->bufPtr = start;
-    sandBox->capacity = size;
-    sandBox->size = size;
-
-    return sandBox;
-}
-
-void sandbox_destroy(sandbox_t **sandBox)
-{
-    if (*sandBox) {
-        free(*sandBox);
-        *sandBox = NULL;
-    }
-}
-
-void sandbox_reset(sandbox_t *sandBox)
-{
-    sandBox->rb_tree.root = NULL;
-    sandBox->bufPtr = sandBox->base;
-    sandBox->used = 0;
-    sandBox->capacity = sandBox->size;
-}
-
-void *sandbox_bucket_allocate(sandbox_t *sandBox, const size_t size, const unsigned align, struct rb_node *rb_node)
-{
-    uint32_t newBase = sandBox->bufPtr;
-    unsigned int len;
-
-    if (align == 2) {
-        newBase = newBase | 0x2UL;
+    const Object_t *object = (Object_t *)node->data;
+    
+    if (key == *object->entry ||
+        (key > *object->entry &&
+         key < *object->entry + object->size)) {
+        return 0;
+    } else if (key >= *object->entry + object->size) {
+        return 1;
     } else {
-        newBase = ALIGN(newBase, align);
+        return -1;
     }
-
-    len = newBase - sandBox->bufPtr + size;
-
-    if (sandBox->capacity > len) {
-        sandBox->capacity -= len;
-        sandBox->used += len;
-        sandBox->bufPtr += len;
-        if (rb_node) {
-            rb_tree_node_put(&sandBox->rb_tree, newBase, rb_node);
-        }
-    } else {
-        newBase = 0;
-    }
-
-    return (void *)newBase;
 }
 
-void *sandbox_get_object(sandbox_t *sandBox, const uint32_t address)
+static void *HARM_SandBox_BlockAlloc(const size_t size, const unsigned align_bits)
 {
-    struct rb_node *rb_node = rb_tree_node_get(&sandBox->rb_tree, address);
+    const size_t cap = (size_t)(g_sandbox.limit - g_sandbox.ptr);
+    const uintptr_t block_base = ALIGN((uintptr_t)g_sandbox.ptr, 1 << align_bits);
+    const size_t len = block_base - (uintptr_t)g_sandbox.ptr + size;
+
+    if (len > cap) {
+        return NULL;
+    }
+
+    g_sandbox.ptr += len;
+
+    return (void *)block_base;
+}
+
+bool HARM_SandBox_PutObject(Object_t *object, const unsigned align_bits)
+{
+    void *block = HARM_SandBox_BlockAlloc(object->size, align_bits);
+
+    if (!block) {
+        /* No enough space in sandbox */
+        return false;
+    }
+
+    /* Copy object from flash memory to sandbox */
+    memcpy(block, (void *)object->address, object->size);
+
+    /* Update address */
+    *object->entry = (uint32_t)block;
+
+    rb_tree_node_put(&g_sandbox.indices, (uint32_t)block, object->node);
+
+    return true;
+}
+
+Object_t *HARM_SandBox_GetObject(const uint32_t address)
+{
+    struct rb_node *rb_node = rb_tree_node_get(&g_sandbox.indices, address);
     if (rb_node) {
-        return (void *)rb_node->data;
+        return (struct object *)rb_node->data;
     }
 
     return NULL;
 }
 
+void HARM_SandBox_Init(void *base, const size_t length)
+{
+    g_sandbox.base = (const uint8_t *)base;
+    g_sandbox.limit = g_sandbox.base + length;
+    g_sandbox.indices.root = NULL;
+    g_sandbox.indices.compare = HARM_SandBox_IndexCmp;
+}
