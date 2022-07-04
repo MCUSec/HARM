@@ -22,44 +22,52 @@
  * SOFTWARE.
  */
 
-#ifndef SANDBOX_H
-#define SANDBOX_H
+#ifndef RBTREE_H
+#define RBTREE_H
 
-#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
-#include "metadata.h"
-#include "utils/rb_tree.h"
 
-struct sandbox {
-    struct rb_tree indices;
-    const uint8_t *base;
-    const uint8_t *limit;
-    uint8_t *ptr;
+struct rb_node {
+    struct rb_node *child[2];
+    struct rb_node *parent;
+    const void *data;
+    uint8_t color;
+} __attribute__((packed));
+
+typedef int (*node_comp_cb_t)(const struct rb_node *node, const unsigned long key);
+
+struct rb_tree {
+    struct rb_node *root;
+    unsigned int size;
+    node_comp_cb_t compare;
 };
 
-typedef struct sandbox SandBox_t;
+typedef void (*node_free_cb_t)(struct rb_node *node);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern SandBox_t g_sandbox;
+struct rb_tree *rb_tree_create(node_comp_cb_t compre_callback);
+void rb_tree_destroy(struct rb_tree **self, node_free_cb_t free_callback);
 
-
-static inline void HARM_SandBox_Reset(void)
-{
-    g_sandbox.indices.root = NULL;
-    g_sandbox.ptr = g_sandbox.base;
-}
-
-void HARM_SandBox_Init(void *base, const size_t length);
-
-bool HARM_SandBox_PutObject(Object_t *object, const unsigned align_bits);
-
-Object_t *HARM_SandBox_GetObject(const uint32_t address);
+struct rb_node *rb_tree_node_get(struct rb_tree *self, const unsigned long key);
+struct rb_node *rb_tree_node_put(struct rb_tree *self, const unsigned long key, struct rb_node *new_node);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SANDBOX_H */
+#define container_of(ptr, type, member) ({ \
+    const typeof(((type *)0)->member) *__mptr = (ptr); \
+    (type *)((char *)__mptr - offsetof(type, member)); \
+})
+
+#define rb_tree_get(rb_tree, key, type, node) \
+    container_of(rb_tree_node_get((rb_tree), (key)), type, node)
+
+#define rb_tree_put(rb_tree, key, entry, node) \
+    rb_tree_node_put((rb_tree), (key), &(entry)->node)
+
+#endif /* RBTREE_H */

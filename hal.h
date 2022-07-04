@@ -26,6 +26,7 @@
 #define HAL_H
 
 #include <stdint.h>
+#include "CMSIS/core_cm33.h"
 #include "macros.h"
 
 #define SCB_NS_VTOR		*((volatile uint32_t *) 0xE002ED08UL)
@@ -72,6 +73,8 @@ void HARM_HAL_SecureTimer_Init(void);
 void HARM_HAL_SecureRNG_Init(void) WEAK;
 
 int HARM_HAL_SecureRNG_GetNext(void) WEAK;
+
+void HARM_HAL_Device_Init(void);
 
 #ifdef __cplusplus
 }

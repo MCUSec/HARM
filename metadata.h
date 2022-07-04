@@ -25,7 +25,7 @@
 #ifndef METADATA_H
 #define METADATA_H
 
-#include "rb_tree/rb_tree.h"
+#include "utils/rb_tree.h"
 #include "macros.h"
 
 struct branchinfo {

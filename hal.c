@@ -48,3 +48,7 @@ WEAK int HARM_HAL_SecureRNG_GetNext(void)
 {
     return rand();
 }
+
+WEAK void HARM_HAL_Device_Init(void)
+{
+}

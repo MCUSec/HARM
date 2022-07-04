@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-
+#include "CMSIS/core_cm33.h"
 #include "sandbox.h"
 #include "arch.h"
 
@@ -55,18 +55,18 @@
 #define HARM_SHUFFLE_PERIOD_MS 200
 #endif
 
-extern const Object_t g_objects[];
-
-extern const Object_t *g_ns_vectors[];
-
-extern const Object_t *g_ns_vec_tbl;
-
 /* typedef for non-secure callback functions */
 typedef void (*funcptr_ns)(void) __attribute__((cmse_nonsecure_call));
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern const Object_t g_objects[];
+
+extern const Object_t *g_ns_vectors[];
+
+extern const Object_t *g_ns_vec_tbl;
 
 void HARM_OnError(const int errcode);
 
