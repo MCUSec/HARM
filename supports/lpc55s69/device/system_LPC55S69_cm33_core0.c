@@ -377,3 +377,53 @@ void SystemCoreClockUpdate (void) {
 __attribute__ ((weak)) void SystemInitHook (void) {
   /* Void implementation of the weak function. */
 }
+
+int _getpid(void)
+{
+    return -1;
+}
+
+void *_sbrk(intptr_t increment)
+{
+    return (void *)0;
+}
+
+int _kill(int pid, int sig)
+{
+    return -1;
+}
+
+int _write(int fd, const void *buf, int count)
+{
+    return -1;
+}
+
+int _close(int fd)
+{
+    return -1;
+}
+
+int _fstat(int fd, void *statbuf)
+{
+    return -1;
+}
+
+int _isatty(int fd)
+{
+    return -1;
+}
+
+int _lseek(int fd, int offset, int whence)
+{
+    return -1;
+}
+
+int _read(int fd, void *buf, int count)
+{
+    return -1;
+}
+
+void _exit(int status)
+{
+    for (;;);
+}
