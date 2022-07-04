@@ -96,7 +96,7 @@ static inline void direct_branch_revise(uint32_t obj_addr, const BranchInfo_t *b
 void HARM_Object_FixRefs(void)
 {
     uint32_t *ns_vectors = (uint32_t *)*g_ns_vec_tbl->entry;
-    Object_t *obj_iter = &g_objects[0];
+    const Object_t *obj_iter = &g_objects[0];
     int i = 0;
 
     for (; i < HARM_OBJECT_LIST_SIZE; i++, obj_iter++) {

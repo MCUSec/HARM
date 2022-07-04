@@ -39,16 +39,12 @@ void HARM_HAL_SecureTimer_Init(void)
     NVIC_SYSTICK_CSR = NVIC_SYSTICK_CLK_Msk | NVIC_SYSTICK_INT_Msk | NVIC_SYSTICK_ENA_Msk;
 }
 
-WEAK void HARM_HAL_SecureRNG_Init(void)
+void HARM_HAL_SecureTimer_Suspend(void)
 {
-    srand(0);
+    NVIC_SYSTICK_CSR = 0UL;
 }
 
-WEAK int HARM_HAL_SecureRNG_GetNext(void)
+void HARM_HAL_SecureTimer_Resume(void)
 {
-    return rand();
-}
-
-WEAK void HARM_HAL_Device_Init(void)
-{
+    NVIC_SYSTICK_CSR = NVIC_SYSTICK_CLK_Msk | NVIC_SYSTICK_INT_Msk | NVIC_SYSTICK_ENA_Msk;
 }

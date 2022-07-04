@@ -38,6 +38,7 @@
 #define UNUSED(x)               (void)x
 #if 1
 
+#if 1
 #define __BKPT(x) 				__asm volatile("bkpt #" # x)
 #define __disable_irq() 		__asm volatile("cpsid i")
 #define __enable_irq() 			__asm volatile("cpsie i")
@@ -45,6 +46,8 @@
 #define __DMB() 				__asm volatile("dmb 0xF" ::: "memory")
 #define __ISB() 				__asm volatile("isb 0xF" ::: "memory")
 #define __WFI()					__asm volatile("wfi")
+#endif
+
 #define __HANDLER_MODE() \
 ({ \
     uint32_t __ipsr; \

@@ -39,6 +39,8 @@ struct branchinfo {
     } dst;
 } PACKED;
 
+typedef struct branchinfo BranchInfo_t;
+
 
 struct object {
     struct rb_node *node;
@@ -49,6 +51,8 @@ struct object {
     uint16_t size;
 };
 
+typedef struct object Object_t;
+
 union callsite {
     uint32_t v;
     struct {
@@ -57,8 +61,6 @@ union callsite {
     };
 };
 
-typedef struct object Object_t;
-typedef struct branchinfo BranchInfo_t;
 typedef union callsite Callsite_t;
 
 

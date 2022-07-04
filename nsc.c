@@ -25,7 +25,7 @@
 #include "harm.h"
 #include "hal.h"
 
-static uint32_t HARM_ISR_EncodeAddress(const uint32_t exc_return_val)
+USED static uint32_t HARM_ISR_EncodeAddress(const uint32_t exc_return_val)
 {
     ExceptionReturn_t exc_return = { .v = exc_return_val };
     ExceptionFrame_t *exc_frame;
@@ -42,7 +42,7 @@ static uint32_t HARM_ISR_EncodeAddress(const uint32_t exc_return_val)
         return exc_return_val;
     }
 
-    exc_frame = exc_return.SPSEL == 1 ? __get_PSP_NS() : __get_MSP_NS();
+    exc_frame = (ExceptionFrame_t *)(exc_return.SPSEL == 1 ? __get_PSP_NS() : __get_MSP_NS());
 
     object = HARM_SandBox_GetObject(exc_frame->pc);
     if (!object) {
@@ -151,14 +151,14 @@ ASM NONSECURE_CALLABLE void HARM_NSC_SecureSleep(void)
 {
     __asm volatile(
         "  .syntax unified                            \n"
-        "  .extern HARM_SecureTimer_Suspend           \n"
-        "  .extern HARM_SecureTimer_Resume            \n"
+        "  .extern HARM_HAL_SecureTimer_Suspend       \n"
+        "  .extern HARM_HAL_SecureTimer_Resume        \n"
         "                                             \n"
         "  cpsid i                                    \n"
         "  push  {lr}                                 \n"
-        "  bl    HARM_SecureTimer_Suspend             \n"
+        "  bl    HARM_HAL_SecureTimer_Suspend         \n"
         "  wfi                                        \n"
-        "  bl    HARM_SecureTimer_Resume              \n"
+        "  bl    HARM_HAL_SecureTimer_Resume          \n"
         "  ldr   lr, [sp], #4                         \n"
         "  cpsie i                                    \n"
         "  bxns  lr                                   \n"

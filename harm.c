@@ -58,7 +58,7 @@ void HARM_ShuffleObjects(ExceptionFrame_t *excepframe)
         if (&g_objects[j] == g_ns_vec_tbl) {
             align_bits = 16;
         } else {
-            if (g_objects[j].address & ~3 == g_objects[j].address) {
+            if ((g_objects[j].address & ~3) == g_objects[j].address) {
                 align_bits = 2;
             } else {
                 align_bits = 1;
@@ -99,7 +99,7 @@ void HARM_OnError(const int errcode)
 {
     __disable_irq();
 
-    HARM_OnErrorHook(errcode);
+    HARM_ErrorHandler(errcode);
     
     for (;;);
 }
@@ -107,4 +107,15 @@ void HARM_OnError(const int errcode)
 WEAK void HARM_ErrorHandler(const int errcode)
 {
     UNUSED(errcode);
+}
+
+int main(void)
+{
+    HARM_HAL_Device_Init();
+    HARM_HAL_SecureRNG_Init();
+    HARM_Bootstrap();
+
+    while (1);
+
+    return 0;
 }

@@ -60,7 +60,7 @@ static void *HARM_SandBox_BlockAlloc(const size_t size, const unsigned align_bit
     return (void *)block_base;
 }
 
-bool HARM_SandBox_PutObject(Object_t *object, const unsigned align_bits)
+bool HARM_SandBox_PutObject(const Object_t *object, const unsigned align_bits)
 {
     void *block = HARM_SandBox_BlockAlloc(object->size, align_bits);
 
@@ -92,7 +92,7 @@ Object_t *HARM_SandBox_GetObject(const uint32_t address)
 
 void HARM_SandBox_Init(void *base, const size_t length)
 {
-    g_sandbox.base = (const uint8_t *)base;
+    g_sandbox.base = (uint8_t *)base;
     g_sandbox.limit = g_sandbox.base + length;
     g_sandbox.indices.root = NULL;
     g_sandbox.indices.compare = HARM_SandBox_IndexCmp;

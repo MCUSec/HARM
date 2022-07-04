@@ -32,8 +32,8 @@
 
 struct sandbox {
     struct rb_tree indices;
-    const uint8_t *base;
-    const uint8_t *limit;
+    uint8_t *base;
+    uint8_t *limit;
     uint8_t *ptr;
 };
 
@@ -54,7 +54,7 @@ static inline void HARM_SandBox_Reset(void)
 
 void HARM_SandBox_Init(void *base, const size_t length);
 
-bool HARM_SandBox_PutObject(Object_t *object, const unsigned align_bits);
+bool HARM_SandBox_PutObject(const Object_t *object, const unsigned align_bits);
 
 Object_t *HARM_SandBox_GetObject(const uint32_t address);
 
