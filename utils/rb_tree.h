@@ -35,6 +35,8 @@ struct rb_node {
     uint8_t color;
 } __attribute__((packed));
 
+typedef struct rb_node RBNode_t;
+
 typedef int (*node_comp_cb_t)(const struct rb_node *node, const unsigned long key);
 
 struct rb_tree {
@@ -42,6 +44,8 @@ struct rb_tree {
     unsigned int size;
     node_comp_cb_t compare;
 };
+
+typedef struct rb_tree RBTree_t;
 
 typedef void (*node_free_cb_t)(struct rb_node *node);
 
