@@ -32,6 +32,7 @@
 // #include "core_cm33.h"
 #include "sandbox.h"
 #include "arch.h"
+#include "hal.h"
 
 #define HARM_ERROR_SUCCESS  0
 #define HARM_ERROR_INDEX_OVERFLOW 1
@@ -72,7 +73,9 @@ void HARM_OnError(const int errcode);
 
 void HARM_ErrorHandler(const int errcode);
 
-void HARM_Bootstrap(void) EXPORT;
+void HARM_ShuffleObjects(ExceptionFrame_t *excepframe);
+
+void HARM_Bootstrap(void);
 
 #ifdef __cplusplus
 }
