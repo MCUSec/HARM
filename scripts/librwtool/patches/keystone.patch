@@ -1,0 +1,13 @@
+diff --git a/llvm/lib/Target/ARM/MCTargetDesc/ARMMCCodeEmitter.cpp b/llvm/lib/Target/ARM/MCTargetDesc/ARMMCCodeEmitter.cpp
+index aa0206a..b84195d 100644
+--- a/llvm/lib/Target/ARM/MCTargetDesc/ARMMCCodeEmitter.cpp
++++ b/llvm/lib/Target/ARM/MCTargetDesc/ARMMCCodeEmitter.cpp
+@@ -593,7 +593,7 @@ static uint32_t getBranchTargetOpValue(const MCInst &MI, unsigned OpIdx,
+   const MCOperand &MO = MI.getOperand(OpIdx);
+ 
+   // If the destination is an immediate, we have nothing to do.
+-  if (MO.isImm()) return MO.getImm();
++  if (MO.isImm()) return MO.getImm() - MI.getAddress() - 4;
+   assert(MO.isExpr() && "Unexpected branch target type!");
+   const MCExpr *Expr = MO.getExpr();
+   MCFixupKind Kind = MCFixupKind(FixupKind);

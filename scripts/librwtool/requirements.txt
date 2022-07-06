@@ -1,0 +1,5 @@
+argparse
+pyelftools
+pyyaml
+capstone
+keystone-engine
