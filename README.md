@@ -19,17 +19,51 @@ Code reuse attacks are particuarly noteworthy in microcontroller-based embedded 
 
 ## Requirements
 
-#### Requirements for target device
+#### Requirements for taret MCU
 
-HARM leverages TrustZone-M to isolate its secure runtime and firmware metadata from the target firmware binary code. It supports ARM Cortex-M seris MCUs with security extension, such as Cortex-M33 MCU. HARM is tested under NXP LPC55S69 development board, we hope HARM can be tested on more devices.
+`HARM` leverages TrustZone-M to isolate its secure runtime and firmware metadata from the target firmware code. Therefore, the target MCU processor must support ARMv8-M architecture and has security extension (i.e., TrustZone-M). Up to now, `HARM` is only tested under [NXP LPC55S69 development board](https://www.nxp.com/design/development-boards/lpcxpresso-boards/lpcxpresso55s69-development-board:LPC55S69-EVK). Please extend `HARM` to support more vendors.
 
-#### Requirements for target binary
+#### Environment
 
-The target binary
+* Unix-like OS, Debian/Ubuntu is recommended 
+* Toolchain: [GNU Arm Embedded Toolchain](https://developer.arm.com/downloads/-/gnu-rm)
+* Debugger such as SEGGER J-Link, which is used to flash the target board
 
-* must be compiled as ARM Thumb-2 code for ARM Cortex-M33
-* must not be stripped, and reserve relocations (through `-Wl,-q` link flag)
+## Usage
+In this tutorial, we illustrate the usage of `HARM` under NXP LPC55S69 development board. First off, please clone `HARM` repository to your work directory.
+```bash
+git clone https://github.com/MCUSec/HARM.git
+cd HARM
+```
 
-## Tutorial
+#### 1. Extract CMSE library
 
-Coming soon!
+CMSE library is an ELF object file (named `secure_rt_cmse.o`) that contains the entry of the secure services (i.e., non-secure callable funtions that perform indirect calls, function returns, etc.). Calling of these functions will be instrumented to the target binary.   
+
+```bash
+cd scripts
+./extract_cmse.sh lpc55s69 # secure_rt_cmse.o will be generated
+```
+#### 2. Instrument the binary
+
+Please refer to the tutorial of `harm-rwtool`.
+
+#### 3. Build HARM secure runtime
+```bash
+mkdir -p build && cd build
+cmake -DTARGET_LPC55S69=On .. # LPC55s69 is the default option
+make
+```
+After this step, you will get the binary of secure runtime named `harm_secure_rt.elf`. Then you can flash the secure runtime and the refined target binary to your NXP LPC55s69 development board.
+
+## Adding Supports
+
+You are welcomed to extend `HARM` to support more MCUs that satisfy the requirement. Please refer [here](supports/README.md) for details.
+
+## Issues
+
+If you encounter any problems with `HARM`, please open an issue. For other communications, please email jiameng @ uga.edu.
+
+## HARM-Rust
+
+We are building a safer `HARM` with Rust to avoid potential memory errors in the `HARM` secure runtime. `HARM-Rust` is coming soon. 
