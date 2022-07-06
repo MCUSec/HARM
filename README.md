@@ -46,7 +46,7 @@ cd scripts
 ```
 #### 2. Instrument the binary
 
-Please refer to the tutorial of `harm-rwtool`.
+Please refer to the [tutorial](scripts/README.md) of `harm-rwtool`.
 
 #### 3. Build HARM secure runtime
 ```bash
