@@ -397,8 +397,8 @@ def main(argv):
 
 if __name__ == '__main__':
     argp = argparse.ArgumentParser(description='Off-device Binary Analysis and Rewriting Tool')
-    argp.add_argument('-c', '--cmse-lib', dest='cmse_lib', type=str, help='CMSE library to load', required=True)
-    argp.add_argument('-e', '--entry-point', dest='entry_point', type=str, help='Entry point of target firmware', default=0x0)
+    argp.add_argument('-c', '--cmse-lib', dest='cmse_lib', type=str, help='CMSE library to load', default='%s/cmse/secure_rt_nsc.o' % os.getcwd())
+    argp.add_argument('-e', '--entry-point', dest='entry_point', type=str, help='Entry point of target firmware', required=True)
     argp.add_argument('-i', '--input-file', type=str, dest='input_file', help='Target firmware (in ELF format)', required=True)
     argp.add_argument('-o', '--output-file', type=str, dest='output_file', help='Output name of instrumented target firmware', default='output.bin')
     argp.add_argument('-p', '--metadata-output-path', dest='metadata_path', type=str, help='Output path of metadata files', default=os.getcwd())
